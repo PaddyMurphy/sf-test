@@ -33,7 +33,7 @@
       ]
     };
   };
-  
+
   Poller.prototype._getRandomNumber = function (min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
   };
@@ -66,10 +66,9 @@
     setTimeout(function () {
       var payload = self._processData(self._getData(config.type), config.limit);
 
-      cb && cb(payload);      
+      cb && cb(payload);
       dfd.resolve(payload);
     }, this._getRandomNumber(400, 2000));
-
     return dfd;
   };
 

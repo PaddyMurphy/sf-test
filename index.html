@@ -16,12 +16,71 @@
   </head>
   <body>
 
+    <div class="container">
+      <h1>Hardcore Produce</h1>
 
+      <ul class="produce-list"><center>Loading...</center></ul>
+    </div>
 
     <!-- JS -->
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
     <script src="./js/api.js"></script>
     <script src="./js/script.js"></script>
+    <script>
+      $(function() {
+        var produceList = $('.produce-list');
+        var poller = new window.spredfast.Poller;
+        var timer = 3000; // TODO: change to 15000
+        var produceInterval;
+        var produce = [];
+
+        function pollProduce(type) {
+          return $.Deferred(function() {
+            var that = this;
+            poller.poll({'type': type}).then(function(d, i) {
+              d.forEach(function(item) {
+                produce.push({'name': item.name, 'count': item.count})
+              })
+              that.resolve();
+            });
+          });
+        }
+
+        function renderProduce() {
+          var row;
+          produceList.empty();
+          // sort it first
+          produce = produce.slice().sort(function (a, b) {
+            a = a['count']
+            b = b['count']
+            return (a - b) * -1
+          })
+
+          // empty the list
+          produce.forEach(function(d) {
+            row = '<li><b class="name">'+d.name+'</b><b class="count">'+d.count+'</b> <small>mentions</small>';
+
+            produceList.append(row);
+          })
+        }
+
+        function promiseProduce () {
+          $.when(pollProduce('veggies'), pollProduce('fruits'))
+            .done(function() {
+              renderProduce(produce)
+              // clear for next call
+              produce = [];
+          });
+        }
+        // call immediately
+        promiseProduce();
+        // update every 15 seconds
+        produceInterval = setInterval(function(){
+          promiseProduce();
+        }, timer);
+
+      });
+    </script>
 
   </body>
 </html>
